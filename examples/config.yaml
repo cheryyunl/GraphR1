@@ -7,11 +7,11 @@ data:
   video_key: videos
   image_dir: null
   video_fps: 2.0
-  max_prompt_length: 4096
+  max_prompt_length: 5120
   max_response_length: 2048
   rollout_batch_size: 128  # equivalent to verl's data.train_batch_size
   mini_rollout_batch_size: null  # equivalent to verl's data.gen_batch_size
-  val_batch_size: 32
+  val_batch_size: 16
   format_prompt: ./examples/format_prompt/dapo_graph.jinja
   override_chat_template: null
   shuffle: true
@@ -86,7 +86,7 @@ worker:
     reward_function: ./examples/reward_function/dapo_graph.py:compute_score
 
 trainer:
-  total_epochs: 10
+  total_epochs: 25
   max_steps: null
   project_name: easy_r1
   experiment_name: qwen2_5_7b_graph_grpo
@@ -94,7 +94,7 @@ trainer:
   nnodes: 1
   n_gpus_per_node: 8
   max_try_make_batch: 20  # -1 means no limit
-  val_freq: 10  # -1 to disable
+  val_freq: 5  # -1 to disable
   val_before_train: false
   val_only: false
   val_generations_to_log: 3

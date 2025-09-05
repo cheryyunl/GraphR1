@@ -4,12 +4,12 @@ set -x
 
 export PYTHONUNBUFFERED=1
 
-MODEL_PATH=Qwen/Qwen2.5-VL-7B-Instruct  # replace it with your local file path
+MODEL_PATH=/code/qwen2.5-vl-7b  # replace it with your local file path
 
 python3 -m verl.trainer.main \
     config=examples/config.yaml \
-    data.train_files=/code/scenes/data_extended@train \
-    data.val_files=/code/scenes/data_extended@validation \
+    data.train_files=cheryyunl/scene_graph@train \
+    data.val_files=cheryyunl/scene_graph@validation \
     data.format_prompt=./examples/format_prompt/dapo_graph.jinja \
     data.mini_rollout_batch_size=32 \
     worker.actor.model.model_path=${MODEL_PATH} \
