@@ -89,6 +89,22 @@ def format_reward(response: str) -> float:
     
     return 1.0
 
+def normalize_object_name(obj_name):
+    if isinstance(obj_name, str) and '/' in obj_name:
+        parts = [part.strip() for part in obj_name.split('/')]
+        return parts
+    return [obj_name]
+
+def objects_match(pred_obj, gt_obj):
+    pred_names = normalize_object_name(pred_obj)
+    gt_names = normalize_object_name(gt_obj)
+    
+    for pred_name in pred_names:
+        for gt_name in gt_names:
+            if pred_name == gt_name:
+                return True
+    return False
+
 def calculate_graph_similarity(pred_json: Dict, gt_json: Dict) -> float:
     """Calculate similarity between predicted and ground truth graph structures."""
     if pred_json is None or gt_json is None:
@@ -114,12 +130,23 @@ def calculate_graph_similarity(pred_json: Dict, gt_json: Dict) -> float:
     
     # 4. Nodes similarity (penalize extra nodes)
     components += 1
-    pred_nodes = set(pred_json.get("nodes", []))
-    gt_nodes = set(gt_json.get("nodes", []))
+    pred_nodes = pred_json.get("nodes", [])
+    gt_nodes = gt_json.get("nodes", [])
     if gt_nodes:
-        # Penalize both missing and extra nodes
-        intersection = len(pred_nodes.intersection(gt_nodes))
-        union = len(pred_nodes.union(gt_nodes))
+        # 计算匹配的节点数，考虑斜杠分隔的情况
+        matched_pred = set()
+        matched_gt = set()
+        
+        for i, pred_node in enumerate(pred_nodes):
+            for j, gt_node in enumerate(gt_nodes):
+                if objects_match(pred_node, gt_node) and i not in matched_pred and j not in matched_gt:
+                    matched_pred.add(i)
+                    matched_gt.add(j)
+                    break
+        
+        # 使用IoU计算相似度
+        intersection = len(matched_pred)  # 匹配的数量
+        union = len(pred_nodes) + len(gt_nodes) - intersection
         nodes_similarity = intersection / union if union > 0 else 0.0
         total_score += nodes_similarity
     
@@ -152,11 +179,16 @@ def calculate_edge_similarity(pred_edge: Dict, gt_edge: Dict) -> float:
     score = 0.0
     components = 0
     
-    # Object matching (bidirectional)
+    # Object matching (bidirectional, 考虑斜杠分隔的情况)
     components += 1
-    pred_objects = {pred_edge.get("object1"), pred_edge.get("object2")}
-    gt_objects = {gt_edge.get("object1"), gt_edge.get("object2")}
-    if pred_objects == gt_objects:
+    pred_obj1, pred_obj2 = pred_edge.get("object1"), pred_edge.get("object2")
+    gt_obj1, gt_obj2 = gt_edge.get("object1"), gt_edge.get("object2")
+    
+    # 检查两种配对方式
+    match1 = objects_match(pred_obj1, gt_obj1) and objects_match(pred_obj2, gt_obj2)
+    match2 = objects_match(pred_obj1, gt_obj2) and objects_match(pred_obj2, gt_obj1)
+    
+    if match1 or match2:
         score += 1.0
     
     # Functional relationship

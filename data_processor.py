@@ -40,7 +40,7 @@ class SceneGraphProcessor:
                 pattern = os.path.join(base_folder, "multiview_subgraphs", "*", "*")
                 scenes = glob.glob(pattern)
             else:
-                # Sim数据: /code/sim_kitchen/FloorPlan1/2/
+                # Sim数据和新场景数据: 通用方法
                 scenes = []
                 for root, dirs, files in os.walk(base_folder):
                     # 检查是否包含JSON和rgb文件夹
@@ -315,7 +315,8 @@ if __name__ == "__main__":
         "/code/sim_kitchen", 
         "/code/sim_bathroom",
         "/code/sim_bedroom",
-        "/code/sim_livingroom"
+        "/code/sim_livingroom",
+        "/code/new_scene"  # 新增数据
     ]
     
     # 创建处理器
@@ -324,9 +325,9 @@ if __name__ == "__main__":
     print("🚀 Scene Graph Dataset Processor")
     print("=" * 50)
     
-    # 先测试10个样本
-    print("🔬 Testing with 10 samples...")
-    processed_data = processor.process_all_scenes(base_folders, max_samples=10)
+    # 处理所有场景（包括新数据）
+    print("🚀 Processing all scenes including new data...")
+    processed_data = processor.process_all_scenes(base_folders)
     
     if processed_data:
         # 创建数据集
@@ -337,10 +338,16 @@ if __name__ == "__main__":
         print(f"Problem: {dataset['train'][0]['problem']}")
         print(f"Answer: {dataset['train'][0]['answer'][:200]}...")
         
-        # 保存测试数据集
-        dataset.save_to_disk("./test_scene_graph_dataset")
-        print("💾 Test dataset saved to ./test_scene_graph_dataset")
+        # 保存完整数据集
+        dataset.save_to_disk("/code/scenes/data_extended")
+        print("💾 Extended dataset saved to /code/scenes/data_extended")
         
-        print("✅ Test completed! Please verify the data before processing all scenes.")
+        print("✅ Data processing completed!")
+        print(f"📊 Total: {len(dataset['train'])} train, {len(dataset['validation'])} validation")
+        
+        # 提示下一步
+        print("\nNext steps:")
+        print("1. Update training script to use /code/scenes/data_extended")
+        print("2. Or upload to HuggingFace: dataset.push_to_hub('cheryyunl/scene_graph_extended')")
     else:
         print("❌ No data processed successfully!")
