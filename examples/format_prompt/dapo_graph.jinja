@@ -1,0 +1,20 @@
+Analyze the multi-view image step by step to identify the key objects and their spatial and functional relationships that are most relevant to completing the given task instruction. Focus only on the essential objects and relationships needed for the task. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is a JSON object including "task_instruction", "nodes", "edges", "action_type", and "function_type".
+
+Available action_types: "press", "rotate", "pull", "open", "push", "close", "insert"
+Available functional_relationships: "openorclose", "adjust", "control", "providepower", "activate"
+Available spatial_relations: "left_of", "right_of", "in_front_of", "behind", "higher_than", "lower_than", "close", "far", "touching"
+
+Note: "is_touching" indicates whether the objects are in physical contact (true) or not (false).
+
+{{ content | trim }}
+
+For example, given an image with task instruction "Power on the toaster.", your analysis and answer should follow this format:
+
+First, I understand the task: "Power on the toaster."
+Then, I identify the key objects needed for this task: an electric outlet and a toaster.
+Next, I analyze their spatial relationships: the outlet is higher than, to the right of, in front of, and close to the toaster.
+Finally, I determine their functional relationship: the outlet can provide power to the toaster. The toaster plug is not yet inserted into the outlet, so they are not touching, which requires an "insert" action for power supply.
+
+Answer: {"task_instruction": "Power on the toaster.", "nodes": ["electric outlet", "toaster"], "edges": [{"functional_relationship": "providepower", "object1": "electric outlet", "object2": "toaster", "spatial_relations": ["higher_than", "right_of", "in_front_of", "close"], "is_touching": false}], "action_type": "insert", "function_type": "power_supply"}
+
+Remember to put your answer on its own line after "Answer:".
