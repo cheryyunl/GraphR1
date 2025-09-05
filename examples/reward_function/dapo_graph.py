@@ -230,9 +230,9 @@ def soft_overlong_punishment(response_length: int, max_response_length: int, ove
 
 def compute_score(
     reward_inputs: list[dict[str, Any]],
-    max_response_length: int = 2048,
-    overlong_buffer_length: int = 512,
-    overlong_penalty_factor: float = 0.5,
+    max_response_length: int,
+    overlong_buffer_length: int,
+    overlong_penalty_factor: float,
     format_weight: float = 0.2,
 ) -> list[dict[str, float]]:
     """Compute DAPO-style scores for graph generation task."""
